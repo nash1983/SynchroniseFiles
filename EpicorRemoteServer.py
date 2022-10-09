@@ -10,7 +10,7 @@ import filecmp
 import signal
 import smtplib
 
-
+# Download installer and do installation on source computer. Merge config files to source installation folder and send file changes from source computer to remote computer
 def install_epicor_silently():
     timeout_s = 180
     cmd = ["powershell.exe", f"cd {directory}; .\\{filename} /s /install --Confirm:$false"]
@@ -23,7 +23,7 @@ def install_epicor_silently():
 
 def uninstall_epicor_silently():
     try:
-        Installed_path1 = f"C:\\Epicor\\SLSDT\\160429-PILOT\\Client\\"
+        Installed_path1 = f"C:\\Epi\\****\\****\\Client\\"
         for exe_filename in os.listdir(Installed_path1):
             if fnmatch.fnmatch(exe_filename, 'ClientInstaller-*.exe'):
                 filename1 = exe_filename
@@ -37,16 +37,16 @@ def uninstall_epicor_silently():
 
 def remove_source_Directory():
     try:
-        shutil.rmtree('c:\\Epicor')
-        shutil.rmtree('C:\\Users\\ADM-nsurapureddy\\Desktop\\Epicor SLS Public Cloud')
+        shutil.rmtree('c:\\Epi')
+        shutil.rmtree('C:\\Users\\')
     except:
         pass
 
 
 def move_installer_2archive():
     try:
-        dest_folder = f"C:\\batch\\Epicor_Archive\\"
-        source_folder = f"C:\\batch\\Epicor\\"
+        dest_folder = f"C:\\batch\\Epi_Archive\\"
+        source_folder = f"C:\\batch\\Epi\\"
         for f in os.listdir(source_folder):
             if os.path.isfile(source_folder + f):
                 shutil.move(source_folder + f, dest_folder + f)
@@ -56,8 +56,8 @@ def move_installer_2archive():
 
 def move_config_2source():
     try:
-        dest_folder = f"C:\\Epicor\\SLSDT\\160429-PILOT\\Client\\config\\"
-        source_folder = f"C:\\EpicorConfigs\\config\\"
+        dest_folder = f"C:\\Epi\\****\\*****\\Client\\config\\"
+        source_folder = f"C:\\EpiConfigs\\config\\"
         for f in os.listdir(source_folder):
             if os.path.isfile(source_folder + f):
                 shutil.copy2(source_folder + f, dest_folder + f)
@@ -66,7 +66,7 @@ def move_config_2source():
 
 
 def restart_remote_computer():
-    computer_list = ["PRD-CTX-EC01"]
+    computer_list = ["RemoteComputerName"]
     for c in computer_list:
         try:
             subprocess.getoutput("shutdown -m \\\\" + c + " -f -r -t 0")
@@ -131,7 +131,7 @@ class Dispatch:
             if os.path.isdir(srcpath):
                 shutil.copytree(srcpath, os.path.join(dest, os.path.basename(f)))
                 self.folder_copied_count = self.folder_copied_count + 1
-                with smtplib.SMTP('relay.rslc.local', 25) as smtp:
+                with smtplib.SMTP('relay', 25) as smtp:
                     body2 = (
                             f"*********************************************** \n"
                             f"Source path:{srcpath}  \n "
@@ -139,13 +139,13 @@ class Dispatch:
                             f"*********************************************** \n"
                             f'Copied sub-directory \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(
                         srcpath) + '\" to \"' + dest + '\"')
-                    smtp.sendmail(from_addr='easupport@boltonclarke.com.au',
-                                  to_addrs='nsurapureddy@boltonclarke.com.au,lcooper1@boltonclarke.com.au',
-                                  msg=f"Subject:Epicor Installation was Successful below sub-directory was transferred from Source to Destination \n\n {body2}")
+                    smtp.sendmail(from_addr='fromAddress',
+                                  to_addrs='toAddress',
+                                  msg=f"Subject:Epi Installation was Successful below sub-directory was transferred from Source to Destination \n\n {body2}")
             else:
                 shutil.copy2(srcpath, dest)
                 self.file_copied_count = self.file_copied_count + 1
-                with smtplib.SMTP('relay.rslc.local', 25) as smtp:
+                with smtplib.SMTP('relay', 25) as smtp:
                     body2 = (
                             f"*********************************************** \n"
                             f"Source path:{srcpath}  \n "
@@ -153,9 +153,9 @@ class Dispatch:
                             f"*********************************************** \n"
                             f'Copied file \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(
                         srcpath) + '\" to \"' + dest + '\"')
-                    smtp.sendmail(from_addr='easupport@boltonclarke.com.au',
-                                  to_addrs='nsurapureddy@boltonclarke.com.au;lcooper1@boltonclarke.com.au',
-                                  msg=f"Subject:Epicor Installation was Successful below file was transferred from Source to Destination \n\n {body2}")
+                    smtp.sendmail(from_addr='fromAddress',
+                                  to_addrs='toAddress',
+                                  msg=f"Subject:Epi Installation was Successful below file was transferred from Source to Destination \n\n {body2}")
 
 
 class Node:
@@ -167,12 +167,12 @@ class Node:
         self.file_list = os.listdir(self.root_path)
 
 
-url = "https://download.epicorsaas.com/d?siteId=160429&environment=PILOT&customInstallLocation="
+url = "https://download/"
 r = urllib.request.urlopen(url)
 _, params = cgi.parse_header(r.headers.get("Content-Disposition", ''))
 filename = params['filename']
-directory = f"c:\\batch\\Epicor\\"
-file_location = f"c:\\batch\\Epicor\\{filename}"
+directory = f"c:\\batch\\Epi\\"
+file_location = f"c:\\batch\\Epi\\{filename}"
 response = request.urlretrieve(url, file_location)
 if __name__ == "__main__":
     main()
@@ -180,8 +180,8 @@ if __name__ == "__main__":
     move_config_2source()
     time.sleep(600)
     my_dispatch = Dispatch('Client')
-    node1 = Node(f"C:\\Epicor\\SLSDT\\160429-PILOT\\Client\\", 'node1')
-    node2 = Node('\\\\' + 'PRD-CTX-EC01' + '\\C$' + '\\Program Files (x86)\\epicor\\Client\\', 'node2')
+    node1 = Node(f"C:\\Epi\\***\\*****\\Client\\", 'node1')
+    node2 = Node('\\\\' + 'RemoteComputer' + '\\C$' + '\\Program Files (x86)\\epi\\Client\\', 'node2')
     my_dispatch.add_node(node1)
     my_dispatch.add_node(node2)
     my_dispatch.compare_nodes()
