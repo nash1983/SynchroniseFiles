@@ -10,7 +10,7 @@ import filecmp
 import signal
 import smtplib
 
-# Download installer and do installation on source computer. Merge config files to source installation folder and send file changes from source computer to remote computer
+
 def install_epicor_silently():
     timeout_s = 180
     cmd = ["powershell.exe", f"cd {directory}; .\\{filename} /s /install --Confirm:$false"]
@@ -23,7 +23,8 @@ def install_epicor_silently():
 
 def uninstall_epicor_silently():
     try:
-        Installed_path1 = f"C:\\Epi\\****\\****\\Client\\"
+         # mention path name 
+        Installed_path1 = f"C:\\****" 
         for exe_filename in os.listdir(Installed_path1):
             if fnmatch.fnmatch(exe_filename, 'ClientInstaller-*.exe'):
                 filename1 = exe_filename
@@ -37,7 +38,8 @@ def uninstall_epicor_silently():
 
 def remove_source_Directory():
     try:
-        shutil.rmtree('c:\\Epi')
+        # sorce directory details
+        shutil.rmtree('c:\\')
         shutil.rmtree('C:\\Users\\')
     except:
         pass
@@ -45,6 +47,7 @@ def remove_source_Directory():
 
 def move_installer_2archive():
     try:
+        #Archive installer file
         dest_folder = f"C:\\batch\\Epi_Archive\\"
         source_folder = f"C:\\batch\\Epi\\"
         for f in os.listdir(source_folder):
@@ -56,8 +59,8 @@ def move_installer_2archive():
 
 def move_config_2source():
     try:
-        dest_folder = f"C:\\Epi\\****\\*****\\Client\\config\\"
-        source_folder = f"C:\\EpiConfigs\\config\\"
+        dest_folder = f"C:\\Epi\\***\\****\\Client\\config\\"
+        source_folder = f"C:\\Epi\\config\\"
         for f in os.listdir(source_folder):
             if os.path.isfile(source_folder + f):
                 shutil.copy2(source_folder + f, dest_folder + f)
@@ -66,7 +69,7 @@ def move_config_2source():
 
 
 def restart_remote_computer():
-    computer_list = ["RemoteComputerName"]
+    computer_list = ["PRD*****"]
     for c in computer_list:
         try:
             subprocess.getoutput("shutdown -m \\\\" + c + " -f -r -t 0")
@@ -75,7 +78,7 @@ def restart_remote_computer():
 
 
 def main():
-    # restart_remote_computer()
+    restart_remote_computer()
     install_epicor_silently()
 
 
@@ -131,7 +134,7 @@ class Dispatch:
             if os.path.isdir(srcpath):
                 shutil.copytree(srcpath, os.path.join(dest, os.path.basename(f)))
                 self.folder_copied_count = self.folder_copied_count + 1
-                with smtplib.SMTP('relay', 25) as smtp:
+                with smtplib.SMTP('relay****', 25) as smtp:
                     body2 = (
                             f"*********************************************** \n"
                             f"Source path:{srcpath}  \n "
@@ -139,13 +142,13 @@ class Dispatch:
                             f"*********************************************** \n"
                             f'Copied sub-directory \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(
                         srcpath) + '\" to \"' + dest + '\"')
-                    smtp.sendmail(from_addr='fromAddress',
-                                  to_addrs='toAddress',
+                    smtp.sendmail(from_addr='',
+                                  to_addrs='',
                                   msg=f"Subject:Epi Installation was Successful below sub-directory was transferred from Source to Destination \n\n {body2}")
             else:
                 shutil.copy2(srcpath, dest)
                 self.file_copied_count = self.file_copied_count + 1
-                with smtplib.SMTP('relay', 25) as smtp:
+                with smtplib.SMTP('relay*****', 25) as smtp:
                     body2 = (
                             f"*********************************************** \n"
                             f"Source path:{srcpath}  \n "
@@ -153,8 +156,8 @@ class Dispatch:
                             f"*********************************************** \n"
                             f'Copied file \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(
                         srcpath) + '\" to \"' + dest + '\"')
-                    smtp.sendmail(from_addr='fromAddress',
-                                  to_addrs='toAddress',
+                    smtp.sendmail(from_addr='',
+                                  to_addrs='',
                                   msg=f"Subject:Epi Installation was Successful below file was transferred from Source to Destination \n\n {body2}")
 
 
@@ -167,7 +170,7 @@ class Node:
         self.file_list = os.listdir(self.root_path)
 
 
-url = "https://download/"
+url = "https://download//"
 r = urllib.request.urlopen(url)
 _, params = cgi.parse_header(r.headers.get("Content-Disposition", ''))
 filename = params['filename']
@@ -180,7 +183,7 @@ if __name__ == "__main__":
     move_config_2source()
     time.sleep(600)
     my_dispatch = Dispatch('Client')
-    node1 = Node(f"C:\\Epi\\***\\*****\\Client\\", 'node1')
+    node1 = Node(f"C:\\Epi\\*****\\*****\\Client\\", 'node1')
     node2 = Node('\\\\' + 'RemoteComputer' + '\\C$' + '\\Program Files (x86)\\epi\\Client\\', 'node2')
     my_dispatch.add_node(node1)
     my_dispatch.add_node(node2)
